@@ -1,0 +1,71 @@
+This doc provides details about the med_app.py api.
+
+-----
+    The med_app is the api for the medium website to fetch the content from the website for desired tags.
+    This python code has 2 functions fetch links, fetch blog
+    fetch links :
+        This function gets the 'tag' that from the js code and then forms the links for to search the recommended articles and 
+        collect all the links for that tag.
+    fetch blog:
+        This function extracts the Title, Content from the first paragraph, and the Thumbnail from the links of the medium website
+
+    In our usage we will be using the js to send the request of the tag with the POST request fetch links and then the returned links will be obtained. They will then be selected for extraction of the Title,content,Image.
+
+Things to be implemented:
+    Store the links in the database, and then track the displayed links and articles.
+    Get all the tags that are avaliable in the medium website, if tags are not avaliable we can't fetch so watch out this for the website.    
+    
+    
+Also in the client side we have to use the db to store each users preference and the things being displayed to them.
+
+
+-----------------------------------
+
+// Define the base URL of your Flask API
+const BASE_URL = "http://localhost:5000"; // Replace with your deployed API URL when hosting
+
+// Function to fetch article links
+async function fetchLinks(tag) {
+  const endpoint = `${BASE_URL}/fetch_links`;
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ source: tag }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error fetching links:", errorData.error);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.links || [];
+  } catch (error) {
+    console.error("Network or API error:", error.message);
+    return [];
+  }
+}
+
+// Function to fetch blog details
+async function fetchBlog(url) {
+  const endpoint = `${BASE_URL}/fetch_blog?url=${encodeURIComponent(url)}`;
+  try {
+    const response = await fetch(endpoint);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error fetching blog:", errorData.error);
+      return null;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Network or API error:", error.message);
+    return null;
+  }
+}
